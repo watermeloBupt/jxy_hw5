@@ -1,0 +1,13 @@
+html,
+body {
+    height: 100%;
+}
+
+form {
+    align-items: center;
+    padding: 5% 25% 5% 20%;
+}
+
+.describe {
+    width: 50%;
+}

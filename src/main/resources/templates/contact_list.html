@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>通信列表</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="../static/my_css/contact_list.css" rel="stylesheet">
+    <script type="text/javascript" src="../static/my_js/contact_list.js"></script>
+</head>
+<body>
+<table class="table table-striped">
+    <caption>通信列表</caption>
+    <thead>
+    <tr>
+        <th>姓名</th>
+        <th>电话</th>
+        <th>邮箱</th>
+        <th>住址</th>
+        <th>QQ号码</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="m:${session.table.getTableinfo()}">
+        <td th:text="${m.getName()}"></td>
+        <td th:text="${m.getTel()}"></td>
+        <td th:text="${m.getEmail()}"></td>
+        <td th:text="${m.getAddr()}"></td>
+        <td th:text="${m.getQq()}"></td>
+        <td>
+            <button class="btn btn-warning" onclick="alter(this)">编辑</button>
+            <button class="btn btn-danger" onclick="del(this)">删除</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div class="btn_fun">
+    <button type="button" class="btn btn-primary" onclick="add(this)">添加</button>
+</div>
+</body>
+</html>
