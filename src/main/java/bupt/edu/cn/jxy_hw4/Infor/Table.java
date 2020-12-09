@@ -9,7 +9,7 @@ public class Table {
         return tableinfo;
     }
 
-    public void setTableinfo(Vector<Contact_Item> tableinfo) {
+    public Table(Vector<Contact_Item> tableinfo) {
         this.tableinfo = tableinfo;
     }
 

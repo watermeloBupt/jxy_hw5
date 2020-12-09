@@ -53,4 +53,23 @@ window.onload=function(){
             }
         }
     }
+
+    $("#telephone").change(function () {// 有效格式才会提交加处理
+        let telephone = $("#telephone").val()
+        $.ajax({
+            type: 'POST',
+            url: '/checkTelephone',
+            data: {'telephone': telephone},
+            success: function (data) {
+                let elem = $('#r2')
+                if (1 === data) {
+                    elem.text('该电话已经存在')
+                    elem.css('color', 'rgb(255, 255, 0)')
+                } else {
+                    elem.text('该电话可用')
+                    elem.css('color', 'rgb(0, 240, 0)')
+                }
+            }
+        })
+    })
 }

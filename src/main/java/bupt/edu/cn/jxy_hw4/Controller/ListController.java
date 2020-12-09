@@ -1,40 +1,45 @@
 package bupt.edu.cn.jxy_hw4.Controller;
 
+import bupt.edu.cn.jxy_hw4.Dao.UserJpaRepository;
 import bupt.edu.cn.jxy_hw4.Infor.Contact_Item;
 import bupt.edu.cn.jxy_hw4.Infor.Table;
 import bupt.edu.cn.jxy_hw4.Infor.Table_Change;
+import bupt.edu.cn.jxy_hw4.Infor.TypeTransformer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
+import java.util.Vector;
 
 @Controller
 public class ListController {
+    // JPA
+    @Autowired
+    private UserJpaRepository userJpaRepository;
+
+
     @GetMapping("/list")
-    public String showMain(HttpServletRequest request){
+    public String showMain(HttpServletRequest request, Model model){
         Object flag = request.getSession().getAttribute("login");
         if(null != flag){
-            HttpSession session = request.getSession();
-            if(null == session.getAttribute("table")){
-                Table table = new Table();
-                session.setAttribute("table", table);
-            }
+            List<Contact_Item> info = userJpaRepository.findAll();           // 获取持久层的数据
+            Table t = new Table(TypeTransformer.listToVector(info));  // 类型转换
+            model.addAttribute("table", t);
             return "contact_list";
         }
         else
             return "redirect:/login";
     }
     @PostMapping("/del")
-    public String DeleteContact(@ModelAttribute(value="row")Integer row, HttpServletRequest request) {
+    public String DeleteContact(@ModelAttribute(value = "name") String name, HttpServletRequest request) {
         Object flag = request.getSession().getAttribute("login");
         if(null != flag) {
-            Table t = (Table) request.getSession().getAttribute("table");
-            Table_Change.deleteElem(t, row);
-            System.out.println("删除！");
+            userJpaRepository.deleteByname(name);
+            System.out.println(name);
             return "redirect:/list";
         }
         else
@@ -56,12 +61,11 @@ public class ListController {
     public String checkAdd(Contact_Item cont, HttpServletRequest request, Model model) {
         Object flag = request.getSession().getAttribute("login");
         if(null != flag) {
-            Table t = (Table) request.getSession().getAttribute("table");
-            boolean is_valid = Table_Change.checkValidAdd(t, cont);
-            if (is_valid) {
-                t.getTableinfo().addElement(cont);
+            List<Contact_Item> list = userJpaRepository.findByname(cont.getName());
+            if (0 == list.size()) {        //   没有重复的
+                userJpaRepository.save(cont);
                 return "redirect:/list";
-            } else {
+            }  else {
                 cont.setName("");
                 return showAdd(cont, model, request);
             }
@@ -71,12 +75,10 @@ public class ListController {
     }
 
     @PostMapping("/alter")
-    public String showAlter(HttpServletRequest request, @ModelAttribute(value="row")Integer row, Contact_Item m, Model model) {
+    public String showAlter(HttpServletRequest request, @ModelAttribute(name = "name") String name, Model model) {
         Object flag = request.getSession().getAttribute("login");
         if(null != flag) {
-            Table t = (Table) request.getSession().getAttribute("table");
-            Contact_Item infor = t.getTableinfo().elementAt(row);
-            model.addAttribute("cont", infor);
+            model.addAttribute("cont", userJpaRepository.findByname(name).get(0));
             return "alter";
         }
         else
@@ -87,11 +89,26 @@ public class ListController {
     public String checkAlter(Contact_Item infor, HttpServletRequest request) {
         Object flag = request.getSession().getAttribute("login");
         if(null != flag) {
-            Table t = (Table) request.getSession().getAttribute("table");
-            Table_Change.alterElem(t, infor);
+            userJpaRepository.save(infor);
             return "redirect:/list";
         }
         else
             return "redirect:/login";
+    }
+
+    // ajax 检测电话号码 是否重复  有重复的返回1 没有重复的返回0
+    @ResponseBody
+    @PostMapping("/checkTelephone")
+    public int checkTel(@RequestParam(name="telephone")String tel, HttpServletRequest request) {
+        Table table = (Table)request.getSession().getAttribute("table");
+        boolean result = false;
+        for (int i = 0; i < userJpaRepository.findAll().size() && !result; i++) {
+            if (userJpaRepository.findAll().get(i).getTel().equals(tel))
+                result = true;
+        }
+        if (result)
+            return 1;
+        else
+            return 0;
     }
 }

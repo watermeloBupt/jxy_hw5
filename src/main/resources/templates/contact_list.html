@@ -22,7 +22,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="m:${session.table.getTableinfo()}">
+    <tr th:each="m:${table.getTableinfo()}">
         <td th:text="${m.getName()}"></td>
         <td th:text="${m.getTel()}"></td>
         <td th:text="${m.getEmail()}"></td>
